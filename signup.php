@@ -1,75 +1,86 @@
 <?php
-session_start();
-if(!isset($_SESSION['name'])){ //|| isset($_SESSION['loggedin'])!=true){
-  header("location:welcome.php");
-}
+    session_start();
+    if(isset($_SESSION['username'])){
+        header("Location: welcome.php");
+    }
 ?>
+<?php
+    include("connection.php");
+    if(isset($_POST['submit'])){
+        $username = mysqli_real_escape_string($conn, $_POST['user']);
+        $email = mysqli_real_escape_string($conn, $_POST['email']);
+        $password = mysqli_real_escape_string($conn, $_POST['pass']);
+        $cpassword = mysqli_real_escape_string($conn, $_POST['cpass']);
+        
+        $sql="select * from signup where username='$username'";
+        $result = mysqli_query($conn, $sql);
+        $count_user = mysqli_num_rows($result);
 
-<?phpif(isset($_POST['submit'])){
-  include "connection.php";
-  $username = mysqli_real_escale_strin ($conn, $_POST['user']);
-  $email = mysqli_real_escale_string($conn, $_POST['email']);
-  $password = mysqli_real_escale_strin ($conn, $_POST['pass']);
-  $cpassword = mysqli_real_escale_strin ($conn, $_POST['cpass']);
+        $sql="select * from signup where email='$email'";
+        $result = mysqli_query($conn, $sql);
+        $count_email = mysqli_num_rows($result);
 
-$sql = "select * from users where username='$username'";
-$result = mysqli_query($conn, $sql);
-$count_user = mysqli_num_rows($result);
-
-$sql = "select * from users where username='$email'";
-$result = mysqli_query($conn, $sql);
-$count_email = mysqli_num_rows($result);
-
-if($count_user==0 || $coun_email==0){
-  if($password==$cpassword){
-    $hash = password_hash($passwored, PASSWORD_DEFAULT);
-    $sql= "insert into users(username, email, password) values('$username', '$email', '$hash')";
-    $result = mysqli_query($conn, $sql);
-
-  }
-  else{
-    echo '<script>
-    alert("Passwords do not match!!!");
-    window.location.href = "signup.php";
-    </script>';
-  }
-  else{
-    echo '<script>
-    alert("User already exists!!!");
-    window.location.href = "index.php";
-    </script>';
-  }
- }
-}
+        if($count_user == 0 & $count_email==0){
+            if($password==$cpassword){
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $sql = "INSERT INTO signup(username, email, password) VALUES('$username', '$email', '$hash')";
+                $result = mysqli_query($conn, $sql);
+                if($result){
+                    header("Location: login.php");
+                }
+            }
+            else{
+                echo '<script>
+                    alert("Passwords do not match");
+                    window.location.href = "signup.php";
+                </script>';
+            }
+        }
+        else{
+            if($count_user>0){
+                echo '<script>
+                    window.location.href="index.php";
+                    alert("Username already exists!!");
+                </script>';
+            }
+            if($count_email>0){
+                echo '<script>
+                    window.location.href="index.php";
+                    alert("Email already exists!!");
+                </script>';
+            }
+        }
+        
+    }
 ?>
-
+<?php
+    include("navbar.php");
+?>
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  </head>
+</head>
   <body>
-  <?php
-    include "navbar.php";
-    ?>
     <div id="form">
-        <h1>Signup Form</h1>
-        <form name="form" action="signup.php" method="Post">
-            <label>Enter Username</label>
+        <h1 id="heading">SignUp Form</h1><br>
+        <form name="form" action="signup.php" method="POST">
+            <label>Enter Username: </label>
             <input type="text" id="user" name="user" required><br><br>
-            <label>Enter Email</label>
-            <input type="text" id="email" name="email" required><br><br>
-            <label>Enter Password</label>
-            <input type="text" id="pass" name="pass" required><br><br>
-            <label>Retype Password</label>
+            <label>Enter Email: </label>
+            <input type="email" id="email" name="email" required><br><br>
+            <label>Create Password: </label>
+            <input type="password" id="pass" name="pass" required><br><br>
+            <label>Retype Password: </label>
             <input type="password" id="cpass" name="cpass" required><br><br>
-            <input type="submit" id="btn" value="Signup" name="submit"/>
-</form>
-</div>     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+            <input type="submit" id="btn" value="SignUp" name = "submit"/>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
   </body>
 </html>
